@@ -274,6 +274,10 @@
         <footer class="mt-8 text-center text-sm" style="color: var(--secondary-text);">
             <p id="footerText">Powered by Jamendo API - All music is royalty-free and legal to stream</p>
             <p class="mt-2">✨ No ads, ever ✨</p>
+            <div class="mt-4 pt-4 border-t border-red-600/30">
+                <p class="text-xs text-red-400">⚠️ Disclaimer: This app uses legal APIs only. No content is hosted on our servers.</p>
+                <p class="text-xs mt-1">DMCA: Copyright claims should be directed to the respective platforms (YouTube, Spotify, Jamendo).</p>
+            </div>
         </footer>
 
         <!-- Settings Modal -->
@@ -335,6 +339,86 @@
             </div>
         </div>
 
+        <!-- PIN Entry Modal -->
+        <div id="pinModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden items-center justify-center z-50">
+            <div class="glass-effect rounded-2xl p-8 max-w-sm w-full mx-4 border-2 border-red-600">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-lock text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2">Enter PIN</h2>
+                    <p class="text-sm" style="color: var(--secondary-text);">Enter passcode to continue</p>
+                </div>
+                
+                <div id="pinDisplay" class="flex justify-center gap-3 mb-6">
+                    <div class="pin-dot w-4 h-4 rounded-full border-2 border-red-600"></div>
+                    <div class="pin-dot w-4 h-4 rounded-full border-2 border-red-600"></div>
+                    <div class="pin-dot w-4 h-4 rounded-full border-2 border-red-600"></div>
+                    <div class="pin-dot w-4 h-4 rounded-full border-2 border-red-600"></div>
+                </div>
+                
+                <div id="pinError" class="text-red-400 text-center text-sm mb-4 hidden">
+                    Incorrect PIN. Try again.
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="1">1</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="2">2</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="3">3</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="4">4</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="5">5</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="6">6</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="7">7</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="8">8</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="9">9</button>
+                    <button id="clearPin" class="bg-red-600/50 hover:bg-red-600 rounded-xl py-4 text-lg font-medium transition-colors">Clear</button>
+                    <button class="pin-btn bg-white/10 hover:bg-white/20 rounded-xl py-4 text-2xl font-medium transition-colors" data-num="0">0</button>
+                    <button id="deletePin" class="bg-red-600/50 hover:bg-red-600 rounded-xl py-4 text-lg font-medium transition-colors">
+                        <i class="fas fa-backspace"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disclaimer Modal -->
+        <div id="disclaimerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50">
+            <div class="glass-effect rounded-xl p-6 max-w-lg w-full mx-4 border-2 border-red-600">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold">Disclaimer & DMCA Notice</h2>
+                </div>
+                
+                <div class="space-y-4 text-sm" style="color: var(--secondary-text);">
+                    <p><strong>Please read carefully before using Spotfuck:</strong></p>
+                    
+                    <div class="bg-red-900/20 border border-red-600/30 rounded-lg p-4">
+                        <p class="font-medium text-red-400 mb-2">⚠️ Legal Notice</p>
+                        <p>Spotfuck is an open-source music player that uses legal APIs to stream music. We do not host any copyrighted content on our servers.</p>
+                    </div>
+                    
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Jamendo:</strong> All music is royalty-free and legally licensed for streaming</li>
+                        <li><strong>YouTube:</strong> Streams content via YouTube's official API (requires your API key)</li>
+                        <li><strong>Spotify:</strong> Only provides 30-second preview clips via Spotify's official API</li>
+                    </ul>
+                    
+                    <p class="text-xs">By using this application, you agree to comply with all applicable laws and the terms of service of the respective music platforms. The developers are not responsible for any misuse of this software.</p>
+                    
+                    <p class="text-xs text-red-400">DMCA: If you believe any content infringes on your copyright, please contact the respective platform (YouTube, Spotify, or Jamendo) directly as we do not host any content.</p>
+                </div>
+                
+                <button id="acceptDisclaimer" class="w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg font-medium mt-6 transition-colors">
+                    I Understand & Accept
+                </button>
+                
+                <p class="text-xs text-center mt-3" style="color: var(--secondary-text);">
+                    This notice will not appear again after acceptance.
+                </p>
+            </div>
+        </div>
+
         <!-- YouTube Player Container -->
         <div id="youtubePlayer" class="hidden"></div>
     </div>
@@ -386,6 +470,13 @@
         const spotifyClientIdInput = document.getElementById('spotifyClientId');
         const spotifyClientSecretInput = document.getElementById('spotifyClientSecret');
         const footerText = document.getElementById('footerText');
+        const disclaimerModal = document.getElementById('disclaimerModal');
+        const acceptDisclaimer = document.getElementById('acceptDisclaimer');
+        const pinModal = document.getElementById('pinModal');
+        const pinDisplay = document.getElementById('pinDisplay');
+        const pinError = document.getElementById('pinError');
+        const clearPin = document.getElementById('clearPin');
+        const deletePin = document.getElementById('deletePin');
         
         // Jamendo API Client ID (free tier)
         const JAMENDO_CLIENT_ID = 'c4ce16c7';
@@ -882,6 +973,85 @@
         // Initialize volume
         audioPlayer.volume = 0.8;
         
+        // PIN Entry System
+        let enteredPin = '';
+        const correctPin = '1412';
+        const pinAuthenticated = localStorage.getItem('pinAuthenticated');
+        
+        function updatePinDisplay() {
+            const dots = pinDisplay.querySelectorAll('.pin-dot');
+            dots.forEach((dot, index) => {
+                if (index < enteredPin.length) {
+                    dot.style.backgroundColor = '#dc2626';
+                } else {
+                    dot.style.backgroundColor = 'transparent';
+                }
+            });
+        }
+        
+        function validatePin() {
+            if (enteredPin === correctPin) {
+                localStorage.setItem('pinAuthenticated', 'true');
+                pinModal.classList.add('hidden');
+                pinModal.classList.remove('flex');
+                showDisclaimer();
+            } else {
+                pinError.classList.remove('hidden');
+                enteredPin = '';
+                updatePinDisplay();
+                setTimeout(() => {
+                    pinError.classList.add('hidden');
+                }, 2000);
+            }
+        }
+        
+        function showDisclaimer() {
+            const disclaimerAccepted = localStorage.getItem('disclaimerAccepted');
+            if (!disclaimerAccepted) {
+                disclaimerModal.classList.remove('hidden');
+                disclaimerModal.classList.add('flex');
+            }
+        }
+        
+        // PIN button clicks
+        document.querySelectorAll('.pin-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (enteredPin.length < 4) {
+                    enteredPin += btn.dataset.num;
+                    updatePinDisplay();
+                    if (enteredPin.length === 4) {
+                        validatePin();
+                    }
+                }
+            });
+        });
+        
+        clearPin.addEventListener('click', () => {
+            enteredPin = '';
+            updatePinDisplay();
+            pinError.classList.add('hidden');
+        });
+        
+        deletePin.addEventListener('click', () => {
+            enteredPin = enteredPin.slice(0, -1);
+            updatePinDisplay();
+            pinError.classList.add('hidden');
+        });
+        
+        // Show PIN modal on load if not authenticated
+        if (!pinAuthenticated) {
+            pinModal.classList.remove('hidden');
+            pinModal.classList.add('flex');
+        } else {
+            showDisclaimer();
+        }
+        
+        acceptDisclaimer.addEventListener('click', () => {
+            localStorage.setItem('disclaimerAccepted', 'true');
+            disclaimerModal.classList.add('hidden');
+            disclaimerModal.classList.remove('flex');
+        });
+        
         // Theme toggle
         let isDarkMode = localStorage.getItem('theme') !== 'light';
         
@@ -913,6 +1083,41 @@
         function onYouTubeIframeAPIReady() {
             console.log('YouTube API ready');
         }
+        
+        // Security measures
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable common dev tools keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                (e.ctrlKey && e.key === 'U')
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Disable drag and drop
+        document.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable text selection (optional - keeps buttons clickable)
+        document.addEventListener('selectstart', (e) => {
+            // Allow selection on inputs and textareas
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                return false;
+            }
+        });
     </script>
 </body>
 </html>
