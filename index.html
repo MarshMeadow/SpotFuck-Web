@@ -161,6 +161,9 @@
                 <button class="source-btn bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg font-medium transition-colors" data-source="spotify">
                     <i class="fab fa-spotify mr-2"></i>Spotify
                 </button>
+                <button class="source-btn bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg font-medium transition-colors" data-source="audius">
+                    <i class="fas fa-headphones mr-2"></i>Audius
+                </button>
             </div>
         </div>
 
@@ -303,7 +306,7 @@
             <p class="mt-2">✨ No ads, ever ✨</p>
             <div class="mt-4 pt-4 border-t border-red-600/30">
                 <p class="text-xs text-red-400">⚠️ Disclaimer: This app uses legal APIs only. No content is hosted on our servers.</p>
-                <p class="text-xs mt-1">DMCA: Copyright claims should be directed to the respective platforms (YouTube, Spotify, Jamendo).</p>
+                <p class="text-xs mt-1">DMCA: Copyright claims should be directed to the respective platforms (YouTube, Spotify, Jamendo, Audius).</p>
             </div>
         </footer>
 
@@ -527,6 +530,8 @@
                 await searchYouTube(query);
             } else if (currentSource === 'spotify') {
                 await searchSpotify(query);
+            } else if (currentSource === 'audius') {
+                await searchAudius(query);
             }
         }
         
@@ -806,6 +811,65 @@
             spotifyAccessToken = data.access_token;
         }
         
+        // Search Audius
+        async function searchAudius(query) {
+            try {
+                let url = `https://audius.co/api/v1/tracks/search?query=${encodeURIComponent(query)}&limit=20`;
+                
+                // Apply search filter
+                if (currentSearchFilter === 'artists') {
+                    url = `https://audius.co/api/v1/users/search?query=${encodeURIComponent(query)}&limit=5`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.data && data.data.length > 0) {
+                        // Get tracks from the first artist
+                        const artistId = data.data[0].id;
+                        const tracksResponse = await fetch(`https://audius.co/api/v1/users/${artistId}/tracks?limit=20`);
+                        const tracksData = await tracksResponse.json();
+                        
+                        if (tracksData.data && tracksData.data.length > 0) {
+                            tracks = tracksData.data.map(track => ({
+                                source: 'audius',
+                                id: track.id,
+                                audio: `https://audius.co/api/v1/tracks/${track.id}/stream`,
+                                image: track.artwork && track.artwork['150x150'] ? track.artwork['150x150'] : 'https://via.placeholder.com/150',
+                                name: track.title,
+                                artist_name: track.user.name,
+                                duration: track.duration
+                            }));
+                            renderTrackList();
+                        } else {
+                            showNoResults();
+                        }
+                    } else {
+                        showNoResults();
+                    }
+                } else {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.data && data.data.length > 0) {
+                        tracks = data.data.map(track => ({
+                            source: 'audius',
+                            id: track.id,
+                            audio: `https://audius.co/api/v1/tracks/${track.id}/stream`,
+                            image: track.artwork && track.artwork['150x150'] ? track.artwork['150x150'] : 'https://via.placeholder.com/150',
+                            name: track.title,
+                            artist_name: track.user.name,
+                            duration: track.duration
+                        }));
+                        renderTrackList();
+                    } else {
+                        showNoResults();
+                    }
+                }
+            } catch (error) {
+                console.error('Error searching Audius:', error);
+                showError();
+            }
+        }
+        
         function showNoResults() {
             trackList.innerHTML = `
                 <div class="text-center text-gray-400 py-8">
@@ -838,6 +902,7 @@
                             >
                             ${track.source === 'youtube' ? '<i class="fab fa-youtube absolute bottom-0 right-0 text-red-500 text-xs bg-black/50 rounded-full p-1"></i>' : ''}
                             ${track.source === 'spotify' ? '<i class="fab fa-spotify absolute bottom-0 right-0 text-green-500 text-xs bg-black/50 rounded-full p-1"></i>' : ''}
+                            ${track.source === 'audius' ? '<i class="fas fa-headphones absolute bottom-0 right-0 text-blue-500 text-xs bg-black/50 rounded-full p-1"></i>' : ''}
                         </div>
                         <div class="flex-1 min-w-0">
                             <h4 class="font-medium truncate">${track.name}</h4>
@@ -867,6 +932,8 @@
                 playYouTubeTrack(track);
             } else if (track.source === 'spotify') {
                 playSpotifyTrack(track);
+            } else if (track.source === 'audius') {
+                playAudiusTrack(track);
             } else {
                 playJamendoTrack(track);
             }
@@ -878,6 +945,14 @@
         }
         
         function playJamendoTrack(track) {
+            audioPlayer.src = track.audio;
+            audioPlayer.play();
+            if (youtubePlayer) {
+                youtubePlayer.stopVideo();
+            }
+        }
+        
+        function playAudiusTrack(track) {
             audioPlayer.src = track.audio;
             audioPlayer.play();
             if (youtubePlayer) {
@@ -1033,7 +1108,9 @@
             } else if (currentSource === 'youtube') {
                 footerText.textContent = 'Powered by YouTube API - Music videos from YouTube';
             } else if (currentSource === 'spotify') {
-                footerText.textContent = 'Powered by Spotify API - Preview tracks (full playback requires Spotify Premium)';
+                footerText.textContent = 'Powered by Spotify API - 30-second preview clips';
+            } else if (currentSource === 'audius') {
+                footerText.textContent = 'Powered by Audius API - Decentralized music streaming platform';
             }
         }
         
