@@ -484,6 +484,13 @@
         let spotifyClientSecret = localStorage.getItem('spotifyClientSecret') || '';
         let spotifyAccessToken = null;
         
+        // Debug: Log loaded credentials
+        console.log('Loaded credentials:', {
+            youtubeApiKey: youtubeApiKey ? 'Present' : 'Missing',
+            spotifyClientId: spotifyClientId ? 'Present' : 'Missing',
+            spotifyClientSecret: spotifyClientSecret ? 'Present' : 'Missing'
+        });
+        
         // DOM Elements
         const audioPlayer = document.getElementById('audioPlayer');
         const searchInput = document.getElementById('searchInput');
@@ -704,6 +711,8 @@
             try {
                 let url = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=jsonpretty&limit=20&include=musicinfo&imagesize=500`;
                 
+                console.log('Jamendo search URL:', url);
+                
                 // Apply search filter
                 if (currentSearchFilter === 'artists') {
                     url += `&artists=${encodeURIComponent(query)}`;
@@ -715,6 +724,8 @@
                 
                 const response = await fetch(url);
                 const data = await response.json();
+                
+                console.log('Jamendo response:', data);
                 
                 if (data.results && data.results.length > 0) {
                     tracks = data.results.map(track => ({
@@ -738,7 +749,9 @@
         
         // Search YouTube
         async function searchYouTube(query) {
-            if (!youtubeApiKey) {
+            console.log('YouTube API key check:', youtubeApiKey ? 'Present' : 'Missing');
+            
+            if (!youtubeApiKey || youtubeApiKey.trim() === '') {
                 trackList.innerHTML = `
                     <div class="text-center py-8 text-yellow-400">
                         <i class="fas fa-key text-4xl mb-3"></i>
@@ -759,10 +772,24 @@
                     searchQuery = query + ' music';
                 }
                 
-                const response = await fetch(
-                    `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&q=${encodeURIComponent(searchQuery)}&type=video&key=${youtubeApiKey}` 
-                );
+                const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&q=${encodeURIComponent(searchQuery)}&type=video&key=${youtubeApiKey}`;
+                console.log('YouTube search URL:', url);
+                
+                const response = await fetch(url);
                 const data = await response.json();
+                
+                console.log('YouTube response:', data);
+                
+                if (data.error) {
+                    console.error('YouTube API error:', data.error);
+                    trackList.innerHTML = `
+                        <div class="text-center py-8 text-red-400">
+                            <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                            <p>YouTube API Error: ${data.error.message}</p>
+                        </div>
+                    `;
+                    return;
+                }
                 
                 if (data.items && data.items.length > 0) {
                     tracks = data.items.map(item => ({
@@ -785,7 +812,14 @@
         
         // Search Spotify
         async function searchSpotify(query) {
-            if (!spotifyClientId || !spotifyClientSecret) {
+            console.log('Spotify credentials check:', { 
+                clientId: spotifyClientId ? 'Present' : 'Missing', 
+                clientSecret: spotifyClientSecret ? 'Present' : 'Missing',
+                clientIdLength: spotifyClientId?.length,
+                clientSecretLength: spotifyClientSecret?.length
+            });
+            
+            if (!spotifyClientId || !spotifyClientSecret || spotifyClientId.trim() === '' || spotifyClientSecret.trim() === '') {
                 trackList.innerHTML = `
                     <div class="text-center py-8 text-yellow-400">
                         <i class="fas fa-key text-4xl mb-3"></i>
@@ -926,24 +960,41 @@
         // Search Audius
         async function searchAudius(query) {
             try {
+                console.log('Audius search starting...');
+                
                 // First get the host from the discovery API
                 const hostResponse = await fetch('https://api.audius.co');
                 const hostData = await hostResponse.json();
+                
+                console.log('Audius host data:', hostData);
+                
+                if (!hostData.data || hostData.data.length === 0) {
+                    console.error('No Audius hosts available');
+                    showError();
+                    return;
+                }
+                
                 const host = hostData.data[0];
+                console.log('Using Audius host:', host);
                 
                 let url = `https://${host}/v1/tracks/search?query=${encodeURIComponent(query)}&limit=20`;
                 
                 // Apply search filter
                 if (currentSearchFilter === 'artists') {
                     url = `https://${host}/v1/users/search?query=${encodeURIComponent(query)}&limit=5`;
+                    console.log('Audius artist search URL:', url);
                     const response = await fetch(url);
                     const data = await response.json();
+                    
+                    console.log('Audius artist response:', data);
                     
                     if (data.data && data.data.length > 0) {
                         // Get tracks from the first artist
                         const artistId = data.data[0].id;
                         const tracksResponse = await fetch(`https://${host}/v1/users/${artistId}/tracks?limit=20`);
                         const tracksData = await tracksResponse.json();
+                        
+                        console.log('Audius artist tracks response:', tracksData);
                         
                         if (tracksData.data && tracksData.data.length > 0) {
                             tracks = tracksData.data.map(track => ({
@@ -963,8 +1014,11 @@
                         showNoResults();
                     }
                 } else {
+                    console.log('Audius track search URL:', url);
                     const response = await fetch(url);
                     const data = await response.json();
+                    
+                    console.log('Audius track response:', data);
                     
                     if (data.data && data.data.length > 0) {
                         tracks = data.data.map(track => ({
@@ -1208,9 +1262,22 @@
             spotifyClientId = spotifyClientIdInput.value.trim();
             spotifyClientSecret = spotifyClientSecretInput.value.trim();
             
+            console.log('Saving credentials:', {
+                youtubeApiKey: youtubeApiKey ? 'Present' : 'Missing',
+                spotifyClientId: spotifyClientId ? 'Present' : 'Missing',
+                spotifyClientSecret: spotifyClientSecret ? 'Present' : 'Missing'
+            });
+            
             localStorage.setItem('youtubeApiKey', youtubeApiKey);
             localStorage.setItem('spotifyClientId', spotifyClientId);
             localStorage.setItem('spotifyClientSecret', spotifyClientSecret);
+            
+            // Verify they were saved
+            console.log('Verified saved credentials:', {
+                youtubeApiKey: localStorage.getItem('youtubeApiKey') ? 'Present' : 'Missing',
+                spotifyClientId: localStorage.getItem('spotifyClientId') ? 'Present' : 'Missing',
+                spotifyClientSecret: localStorage.getItem('spotifyClientSecret') ? 'Present' : 'Missing'
+            });
             
             settingsModal.classList.add('hidden');
             settingsModal.classList.remove('flex');
